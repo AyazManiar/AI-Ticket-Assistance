@@ -6,7 +6,29 @@ import { inngest } from "../inngest/client.js";
 // POST
 export const signup = async (req, res) => {
     const { email, password, skills = [] } = req.body;
+    
+    // Input validation
+    if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+    }
+    
+    if (password.length < 6) {
+        return res.status(400).json({ error: "Password must be at least 6 characters long" });
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Please enter a valid email address" });
+    }
+    
     try {
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ error: "User with this email already exists" });
+        }
+        
         const hashedPassword = await bcrypt.hash(password, 10)
         const user = await User.create({ email, password: hashedPassword, skills });
 
@@ -24,7 +46,17 @@ export const signup = async (req, res) => {
             { _id: user._id, role: user.role},
             process.env.JWT_SECRET,
         )
-        res.json({ user, token})
+        
+        // Don't send password in response
+        const userResponse = {
+            _id: user._id,
+            email: user.email,
+            role: user.role,
+            skills: user.skills,
+            createdAt: user.createdAt
+        };
+        
+        res.json({ user: userResponse, token})
     } catch (error) {
         res.status(500).json({ error: "Signup failed", details: error.message });
     }
@@ -33,17 +65,34 @@ export const signup = async (req, res) => {
 // POST
 export const login = async (req, res) => {
     const { email, password } = req.body;
+    
+    // Input validation
+    if (!email || !password) {
+        return res.status(400).json({ error: "Email and password are required" });
+    }
+    
     try {
         const user = await User.findOne({ email });
         if(!user) return res.status(404).json({ error: "User not found" });
         const isMatch = await bcrypt.compare(password, user.password);
         if(!isMatch) return res.status(401).json({ error: "Invalid credentials" });
+        
         // Log the user in
         const token = jwt.sign( 
             { _id: user._id, role: user.role},
             process.env.JWT_SECRET,
         )
-        res.json({ user, token})
+        
+        // Don't send password in response
+        const userResponse = {
+            _id: user._id,
+            email: user.email,
+            role: user.role,
+            skills: user.skills,
+            createdAt: user.createdAt
+        };
+        
+        res.json({ user: userResponse, token})
     } catch (error) {
         res.status(500).json({ error: "Login failed", details: error.message });
     }
@@ -124,7 +173,7 @@ export const getAppropriateModerator = async (relatedSkills) => {
         if (highestSkillMatch.matchCount === 0) {
             try {
                 const admin = await User.findOne({ role: "admin" }).select("_id email");
-                highestSkillMatch.person = admin || null;
+                return admin ? admin._id : null;
             } catch (error) {
                 throw new Error("Failed to fetch admins: " + error.message);
             }

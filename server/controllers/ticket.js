@@ -4,10 +4,10 @@ import  Ticket from "../models/ticket.model.js";
 // POST
 export const createTicket = async (req, res) => {
     try {
-        const {title, description, userId } = req.body;
-        userId = userId.toString();
-        if(!title || !description || !userId) {
-            return res.status(400).json({message: "Title, description and userId are required"});
+        const {title, description } = req.body;
+        const userId = req.user._id.toString();
+        if(!title || !description) {
+            return res.status(400).json({message: "Title and description are required"});
         }
         const newTicket = await Ticket.create({
             title,
@@ -34,7 +34,7 @@ export const createTicket = async (req, res) => {
 // GET
 export const getTickets = async (req, res) => {
     try {
-        const { user } = req.user
+        const user = req.user;
         let tickets = []
         if(user.role !== "user"){
             tickets = await Ticket.find({})
@@ -60,7 +60,7 @@ export const getTickets = async (req, res) => {
 // GET
 export const getTicket = async (req, res) => {
     try {
-        const { user } = req.user;
+        const user = req.user;
         let ticket;
         if(user.role !== "user"){
             ticket = await Ticket.findById(req.params.id)
@@ -78,6 +78,7 @@ export const getTicket = async (req, res) => {
             ticket: ticket
         });
     } catch (error) {
-        
+        console.error("Error fetching ticket:", error);
+        return res.status(500).json({message: "Internal server error"});
     }
 }

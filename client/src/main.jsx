@@ -1,11 +1,11 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.jsx'
 import { createBrowserRouter, RouterProvider } from "react-router";
 // Components
-import CheckAuth from './components/checkAuth.jsx';
+import CheckAuth from './components/CheckAuth.jsx';
 // Pages
+import Landing from './pages/Landing.jsx';
 import Admin from './pages/Admin.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
@@ -15,41 +15,38 @@ import Tickets from './pages/Tickets.jsx';
 let router = createBrowserRouter([
   {
     path: "/",
-    Component: 
+    element: <Landing />
+  },
+  {
+    path: "/dashboard",
+    element: 
     <CheckAuth protected={true} >
       <Tickets />
     </CheckAuth>
   },{
     path: "/ticket/:id",
-    Component: 
+    element: 
     <CheckAuth protected={true} >
       <TicketDetailsPage />
     </CheckAuth>
   },
   {
     path: "/login",
-    Component: 
+    element: 
     <CheckAuth protected={false} >
       <Login />
     </CheckAuth>
   },
   {
     path: "/signup",
-    Component: 
+    element: 
     <CheckAuth protected={false} >
       <Signup />
     </CheckAuth>
   },
   {
-    path: "/",
-    Component: 
-    <CheckAuth protected={true} >
-      <Ticket />
-    </CheckAuth>
-  },
-  {
     path: "/admin",
-    Component: 
+    element: 
     <CheckAuth protected={true} >
       <Admin />
     </CheckAuth>

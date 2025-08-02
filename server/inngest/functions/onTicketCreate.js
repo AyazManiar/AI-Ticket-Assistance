@@ -36,8 +36,8 @@ export const onTicketCreate = inngest.createFunction(
             // Step 3; Update the ticket on Database with AI Metadata
             const relatedSkills = await step.run("update-ticket-with-ai-metadata", 
                 async () => {
-                    const priority = !["LOW", "MEDIUM", "HIGH"].includes(aiResponse.priority) ? "MEDIUM" : aiResponse.priority;
-                    const skills = aiResponse.skills || [];
+                    const priority = !["low", "medium", "high"].includes(aiResponse.priority.toLowerCase()) ? "MEDIUM" : aiResponse.priority.toUpperCase();
+                    const skills = aiResponse.relatedSkills || [];
                     await Ticket.updateOne(
                         { _id: ticket._id },
                         { 
@@ -64,27 +64,37 @@ export const onTicketCreate = inngest.createFunction(
                     await Ticket.updateOne(
                         { _id: ticket._id },
                         { 
-                            assignedTo: moderator._id,
+                            assignedTo: moderator,
                             status: "IN_PROGRESS"
                         }
                     )
                 }
             )
             // Step 6: Send user email that ticket has been assigned to a moderator
-            const success = await step.run("notify-user-and-moderator-  -ticket-assigned", 
+            const success = await step.run("notify-user-and-moderator-ticket-assigned", 
                 async () => {
                     try {
+                        // Get user email from ticket
+                        const ticketWithUser = await Ticket.findById(ticket._id).populate("createdBy", "email");
+                        
                         // Send email to moderator
                         await sendMail(
                             moderator.email,  //to
                             "You have been assigned a new ticket",  //subject
-                            `A new ticket is assigned to you, titled "${ticket.title}".` // text
+                            `A new ticket is assigned to you, titled "${ticket.title}". 
+                            
+Description: ${ticket.description}
+
+AI Notes: ${aiResponse.helpfulNotes || 'No additional notes available.'}
+
+Priority: ${aiResponse.priority}
+Required Skills: ${relatedSkills.join(', ')}` // text
                         )
                         // Send email to user
                         await sendMail(
-                            ticket.createdBy.email,  //to
+                            ticketWithUser.createdBy.email,  //to
                             "Your ticket has been assigned to a moderator",  //subject
-                            `Your ticket titled "${ticket.title}" has been assigned to ${moderator.email} for further assistance.` // text
+                            `Your ticket titled "${ticket.title}" has been assigned to a moderator for further assistance. You will be notified once there are updates.` // text
                         )
                         return { success: true };
                     } catch (error) {

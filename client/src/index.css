@@ -1,7 +1,6 @@
-:root {
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+/* Import all component styles */
+@import './styles/base.css';
+@import './styles/components.css';
+@import './styles/auth.css';
+@import './styles/landing.css';
+@import './styles/dashboard.css';
