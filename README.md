@@ -2,6 +2,8 @@
 
 A smart ticket management system that uses AI to automatically assign support tickets to the right moderators based on their skills — making problem resolution faster and more efficient.
 
+![AI Ticket Generator](AI%20Ticket%20Generator.webp)
+
 ---
 
 ## **Table of Contents**
