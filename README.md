@@ -15,8 +15,7 @@ A smart ticket management system that uses AI to automatically assign support ti
 7. [API Documentation](#api-documentation)
 8. [Ticket Processing Flow](#ticket-processing-flow)
 9. [Security Features](#security-features)
-10. [Current Status](#current-status)
-11. [Author](#author)
+10. [Author](#author)
 
 ---
 
@@ -176,15 +175,6 @@ This ensures faster resolution, better workload distribution, and improved custo
 
 ---
 
-## **Current Status**
-
-✅ Authentication & authorization
-✅ Ticket creation & listing
-✅ AI analysis & assignment
-✅ Email notifications
-✅ Background job processing
-
----
 
 ## **Author**
 
